@@ -1,43 +1,43 @@
-import discord
-from discord.ext import commands
-import youtube_dl
 import asyncio
-import DiscordUtils
 import json
 import random
-from discord_slash import cog_ext
+
+import DiscordUtils
+import discord
+import youtube_dl
+from discord.ext import commands
 from discord_slash import SlashCommand
 
 
-async def get_prefix(bot, message):
-
-    with open("prefixes.json", "r") as f:
+async def get_prefix(message):
+    with open("/home/mmi21b12/DISCORD/BLITZ/prefixes.json", "r") as f:
         prefixes = json.load(f)
 
     return prefixes[str(message.guild.id)]
 
 
-bot = commands.Bot(command_prefix = get_prefix)
+bot = commands.Bot(command_prefix=get_prefix)
 musics = {}
 ytdl = youtube_dl.YoutubeDL()
 music = DiscordUtils.Music()
 bot.remove_command("help")
-slash = SlashCommand(bot, sync_commands = True)
+slash = SlashCommand(bot, sync_commands=True)
 
 extensions = ['prefix']
 
 
-#py Desktop\Bots_Discord\Blitz\main.py
+# py Desktop\Bots_Discord\Blitz\main.py
 
 
 @bot.event
 async def on_ready():
-
-    await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=f"sur {len(bot.guilds)} serveurs | *help"))
+    await bot.change_presence(
+        activity=discord.Activity(type=discord.ActivityType.watching, name=f"sur {len(bot.guilds)} serveurs | *help"))
     await bot.change_presence(activity=discord.Game(f"être codé par Dr3Xt3r"))
     await bot.change_presence(activity=discord.Game(f"BOT de Musique"))
 
     print("Blitz est démarré")
+
 
 async def ch_pr():
     await bot.wait_until_ready()
@@ -45,13 +45,14 @@ async def ch_pr():
     statuses = [f"sur {len(bot.guilds)} serveurs | *help", "être codé par Dr3Xt3r", "BOT Musique"]
 
     while not bot.is_closed():
-
         status = random.choice(statuses)
         await bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=status))
 
         await asyncio.sleep(10)
 
+
 bot.loop.create_task(ch_pr())
+
 
 @bot.command()
 async def join(ctx):
@@ -60,6 +61,7 @@ async def join(ctx):
         return await ctx.send("**Blitz** ne peut pas se connecter car vous n'êtes pas dans un salon vocal !")
     await ctx.author.voice.channel.connect()
     await ctx.send("**Blitz** a rejoint votre *salon vocal* !")
+
 
 @bot.command()
 async def leave(ctx):
@@ -71,6 +73,7 @@ async def leave(ctx):
         return await ctx.send("**Blitz** ne peut pas quitter car il n'est pas dans un salon vocal !")
     await ctx.voice_client.disconnect()
     await ctx.send("**Blitz** a quitté votre *salon vocal* !")
+
 
 @bot.command()
 async def play(ctx, *, url):
@@ -92,6 +95,7 @@ async def play(ctx, *, url):
             song = await player.queue(url, search=True)
             await ctx.send(f"**Blitz** a ajouté `{song.name}` à la queue !")
 
+
 @bot.command()
 async def p(ctx, *, url):
     player = music.get_player(guild_id=ctx.guild.id)
@@ -103,7 +107,7 @@ async def p(ctx, *, url):
         await ctx.author.voice.channel.connect()
     else:
         pass
-        
+
     if not player:
         player = music.create_player(ctx, ffmpeg_error_betterfix=True)
     if not ctx.voice_client.is_playing():
@@ -120,17 +124,20 @@ async def queue(ctx):
     player = music.get_player(guild_id=ctx.guild.id)
     await ctx.send(f"{' **|** '.join([song.name for song in player.current_queue()])}")
 
+
 @bot.command()
 async def pause(ctx):
     player = music.get_player(guild_id=ctx.guild.id)
     song = await player.pause()
     await ctx.send(f'**Blitz** a mis `{song.name}` mis en pause !')
 
+
 @bot.command()
 async def resume(ctx):
     player = music.get_player(guild_id=ctx.guild.id)
     song = await player.resume()
     await ctx.send(f'**Blitz** a mis `{song.name}` en lecture !')
+
 
 @bot.command()
 async def loop(ctx):
@@ -141,11 +148,13 @@ async def loop(ctx):
     else:
         return await ctx.send(f'**Blitz** ne peut pas relancer `{song.name}` !')
 
+
 @bot.command()
 async def nowplaying(ctx):
     player = music.get_player(guild_id=ctx.guild.id)
     song = player.now_playing()
     await ctx.send(f"`{song.name}`")
+
 
 @bot.command()
 async def remove(ctx, index):
@@ -153,25 +162,28 @@ async def remove(ctx, index):
     song = await player.remove_from_queue(int(index))
     await ctx.send(f'**Blitz** a retiré `{song.name}` de la queue')
 
+
 @bot.command()
 async def skip(ctx):
     client = ctx.guild.voice_client
     client.stop()
 
+
 @bot.command()
 async def help(ctx):
-    em = discord.Embed(title = "Help Blitz", description = "Voici la liste des toutes les commandes disponibles avec Blitz:", color = 0xFF00D1)
-    em.add_field(name = "✅ `join`", value = "• Rejoint le salon vocal", inline = False)
-    em.add_field(name = "❌ `leave`", value = "• Quitte le salon vocal", inline = False)
-    em.add_field(name = "🎵 `play <url>`", value = "• Joue une musique", inline = False)
-    em.add_field(name = "⏸️ `pause`", value = "• Met en pause la musique", inline = False)
-    em.add_field(name = "⏯️ `resume`", value = "• Relance la musique", inline = False)
-    em.add_field(name = "⏭️ `skip`", value = "• Passe à la musique suivante", inline = False)
-    em.add_field(name = "🎶 `queue`", value = "• Affiche la liste des musiques", inline = False)
-    em.add_field(name = "🔁 `loop`", value = "• Relance la même musique qu'avant", inline = False)
-    em.add_field(name = "⏺️ `nowplaying`", value = "• Affiche la musique en cours", inline = False)
-    em.add_field(name = "⁉️ `/setprefix <prefix>`", value = "• Changer le prefix du bot", inline = False)
-    await ctx.send(embed = em)
+    em = discord.Embed(title="Help Blitz",
+                       description="Voici la liste des toutes les commandes disponibles avec Blitz:", color=0xFF00D1)
+    em.add_field(name="✅ `join`", value="• Rejoint le salon vocal", inline=False)
+    em.add_field(name="❌ `leave`", value="• Quitte le salon vocal", inline=False)
+    em.add_field(name="🎵 `play <url>`", value="• Joue une musique", inline=False)
+    em.add_field(name="⏸️ `pause`", value="• Met en pause la musique", inline=False)
+    em.add_field(name="⏯️ `resume`", value="• Relance la musique", inline=False)
+    em.add_field(name="⏭️ `skip`", value="• Passe à la musique suivante", inline=False)
+    em.add_field(name="🎶 `queue`", value="• Affiche la liste des musiques", inline=False)
+    em.add_field(name="🔁 `loop`", value="• Relance la même musique qu'avant", inline=False)
+    em.add_field(name="⏺️ `nowplaying`", value="• Affiche la musique en cours", inline=False)
+    em.add_field(name="⁉️ `/setprefix <prefix>`", value="• Changer le prefix du bot", inline=False)
+    await ctx.send(embed=em)
 
 
 ###########################################################################################
@@ -184,6 +196,7 @@ async def load(ctx, extension):
     except Exception as error:
         await ctx.send('**{}** cannot be loaded. [{}]'.format(extension, error))
 
+
 @bot.command()
 async def unload(ctx, extension):
     try:
@@ -192,12 +205,14 @@ async def unload(ctx, extension):
     except Exception as error:
         await ctx.send('**{}** cannot be unloaded. [{}]'.format(extension, error))
 
+
 if __name__ == '__main__':
     for extension in extensions:
         try:
             bot.load_extension(extension)
         except Exception as error:
             print('**{}** cannot be loaded. [{}]'.format(extension, error))
+
 
 @bot.command()
 async def reload(ctx, extension):
