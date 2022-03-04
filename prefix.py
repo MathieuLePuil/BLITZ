@@ -1,51 +1,52 @@
-import discord
 from discord.ext import commands
 import json
+
+from discord.ext.commands import bot
 from discord_slash import cog_ext
 
+
 class Prefix(commands.Cog):
-	def __init__(self, bot):
-		self.bot = bot
+    def __init__(self, bot):
+        self.bot = bot
 
-	@commands.Cog.listener()
-	async def on_guild_join(self, guild):
-	    with open("prefixes.json", "r") as f:
-	        prefixes = json.load(f)
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild):
+        with open("/home/mmi21b12/DISCORD/BLITZ/prefixes.json", "r") as f:
+            prefixes = json.load(f)
 
-	    prefixes[str(guild.id)] = "*"
+        prefixes[str(guild.id)] = "*"
 
-	    with open("prefixes.json", "w") as f:
-	        json.dump(prefixes, f, indent = 2)
+        with open("/home/mmi21b12/DISCORD/BLITZ/prefixes.json", "w") as f:
+            json.dump(prefixes, f, indent=2)
 
-	@cog_ext.cog_slash(name = "setprefix", description = "Change le prefix du bot.")
-	@commands.has_permissions(administrator = True)
-	async def setprefix(self, ctx, prefix):
-	    with open("prefixes.json", "r") as f:
-	        prefixes = json.load(f)
+    @cog_ext.cog_slash(name="setprefix", description="Change le prefix du bot.")
+    @commands.has_permissions(administrator=True)
+    async def setprefix(self, ctx, prefix):
+        with open("prefixes.json", "r") as f:
+            prefixes = json.load(f)
 
-	    prefixes[str(ctx.guild.id)] = prefix
+        prefixes[str(ctx.guild.id)] = prefix
 
-	    with open("prefixes.json", "w") as f:
-	        json.dump(prefixes, f, indent = 2)
+        with open("/home/mmi21b12/DISCORD/BLITZ/prefixes.json", "w") as f:
+            json.dump(prefixes, f, indent=2)
 
-	    await ctx.send(f"<a:scarycheck:835499517977690122> Le prefix a bien été changé en `{prefix}`")
+        await ctx.send(f"<a:scarycheck:835499517977690122> Le prefix a bien été changé en `{prefix}`")
 
-	@commands.Cog.listener()
-	async def on_message(self, msg):
+    @commands.Cog.listener()
+    async def on_message(self, msg):
 
-	    try:
-	        if msg.mentions[0] == bot.user:
+        try:
+            if msg.mentions[0] == bot.user:
+                with open("/home/mmi21b12/DISCORD/BLITZ/prefixes.json", "r") as f:
+                    prefixes = json.load(f)
 
-	            with open("prefixes.json", "r") as f:
-	                prefixes = json.load(f)
+                pre = prefixes[str(msg.guild.id)]
 
-	            pre = prefixes[str(msg.guild.id)]
+                await msg.channel.send(f"Prefix: `{pre}`")
 
-	            await msg.channel.send(f"Prefix: `{pre}`")
-
-	    except:
-	        pass
+        except:
+            pass
 
 
 def setup(bot):
-	bot.add_cog(Prefix(bot))
+    bot.add_cog(Prefix(bot))
