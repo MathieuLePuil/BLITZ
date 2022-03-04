@@ -26,7 +26,7 @@ slash = SlashCommand(bot, sync_commands=True)
 extensions = ['prefix']
 
 
-# py Desktop\Bots_Discord\Blitz\main.py
+# py Desktop\BOTS_DISCORD\Blitz\main.py
 
 
 @bot.event
